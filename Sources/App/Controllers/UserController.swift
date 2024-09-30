@@ -41,6 +41,7 @@ struct UserController: RouteCollection {
         guard let user = try await User.find(req.parameters.get("userID"), on: req.db) else {
             throw Abort(.notFound)
         }
+        user.username = input.username
         user.avatarURL = input.avatarURL
         user.phone = input.phone
         user.address = input.address

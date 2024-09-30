@@ -26,6 +26,7 @@ struct CreateOrderStatusRecord: AsyncMigration {
     func prepare(on database: Database) async throws {
         try await database.schema("order_status_records")
             .id()
+            .field("order_id", .uuid, .required, .references("orders", "id", onDelete: .cascade))
             .field("status", .string, .required)
             .field("timestamp", .datetime, .required)
             .create()

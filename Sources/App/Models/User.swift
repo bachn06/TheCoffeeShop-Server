@@ -15,6 +15,9 @@ final class User: @unchecked Sendable, Model, Content {
     @ID(key: .id)
     var id: UUID?
     
+    @Field(key: "username")
+    var username: String
+    
     @Field(key: "avatar_url")
     var avatarURL: String?
     
@@ -32,8 +35,9 @@ final class User: @unchecked Sendable, Model, Content {
     
     init() {}
     
-    init(id: UUID? = nil, avatarURL: String? = nil, phone: String, address: String) {
+    init(id: UUID? = nil, username: String, avatarURL: String? = nil, phone: String, address: String) {
         self.id = id
+        self.username = username
         self.avatarURL = avatarURL
         self.phone = phone
         self.address = address

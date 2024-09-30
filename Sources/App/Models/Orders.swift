@@ -15,11 +15,11 @@ final class Order: @unchecked Sendable, Model, Content {
     @ID(key: .id)
     var id: UUID?
     
-    @Field(key: "statusHistory")
-    var statusHistory: [OrderStatusRecord]
-    
     @Parent(key: "user_id")
     var user: User
+    
+    @Children(for: \.$order)
+    var statusRecords: [OrderStatusRecord]
     
     @Children(for: \.$order)
     var orderProducts: [OrderProduct]
@@ -32,9 +32,8 @@ final class Order: @unchecked Sendable, Model, Content {
     
     init() {}
     
-    init(id: UUID? = nil, statusHistory: [OrderStatusRecord]) {
+    init(id: UUID? = nil) {
         self.id = id
-        self.statusHistory = statusHistory
     }
 }
 
@@ -44,6 +43,9 @@ final class OrderStatusRecord: @unchecked Sendable, Model, Content {
     @ID(key: .id)
     var id: UUID?
     
+    @Parent(key: "order_id")
+    var order: Order
+    
     @Field(key: "status")
     var status: OrderStatus
     
@@ -52,12 +54,14 @@ final class OrderStatusRecord: @unchecked Sendable, Model, Content {
 
     init() {}
 
-    init(id: UUID? = nil, status: OrderStatus, timestamp: Date) {
+    init(id: UUID? = nil, orderId: UUID, status: OrderStatus, timestamp: Date) {
         self.id = id
+        self.$order.id = orderId
         self.status = status
         self.timestamp = timestamp
     }
 }
+
 
 final class OrderProduct: @unchecked Sendable, Model, Content {
     static let schema = "order_products"

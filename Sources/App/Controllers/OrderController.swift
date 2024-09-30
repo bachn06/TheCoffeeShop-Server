@@ -41,7 +41,6 @@ struct OrderController: RouteCollection {
         guard let order = try await Order.find(req.parameters.get("orderID"), on: req.db) else {
             throw Abort(.notFound)
         }
-        order.statusHistory = input.statusHistory
         try await order.save(on: req.db)
         return order
     }
