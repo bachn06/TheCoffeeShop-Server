@@ -7,39 +7,47 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
 final class User: @unchecked Sendable, Model, Content {
     static let schema = "users"
     
     @ID(key: .id)
     var id: UUID?
-    
-    @Field(key: "username")
-    var username: String
-    
-    @Field(key: "avatar_url")
-    var avatarURL: String?
-    
+
+    @Field(key: "name")
+    var name: String
+
+    @Field(key: "avatar")
+    var avatar: String
+
     @Field(key: "phone")
     var phone: String
-    
+
     @Field(key: "address")
     var address: String
-    
-    @Children(for: \.$user)
-    var orders: [Order]
-    
-    @OptionalChild(for: \.$user)
-    var cart: Cart?
-    
-    init() {}
-    
-    init(id: UUID? = nil, username: String, avatarURL: String? = nil, phone: String, address: String) {
+
+    init() { }
+
+    init(id: UUID? = nil, name: String, avatar: String, phone: String, address: String) {
         self.id = id
-        self.username = username
-        self.avatarURL = avatarURL
+        self.name = name
+        self.avatar = avatar
         self.phone = phone
         self.address = address
     }
+}
+
+struct LoginRequest: Codable {
+    var userName: String
+    var phoneNumber: String
+}
+
+struct LoginResponse: Codable, Content {
+    var userId: UUID?
+    var accessToken: AccessToken
+}
+
+struct AccessToken: Codable, Content {
+    var accessToken: String
+    var expireIn: Int
 }

@@ -12,13 +12,14 @@ struct CreateProduct: AsyncMigration {
         try await database.schema("products")
             .id()
             .field("name", .string, .required)
-            .field("image_url", .string)
-            .field("price", .string, .required)
-            .field("size", .string)
-            .field("product_description", .string, .required)
-            .field("rating", .double)
-            .field("is_favourite", .bool, .required)
-            .field("quantity", .int, .required)
+            .field("image", .string, .required)
+            .field("price", .double, .required)
+            .field("description", .string, .required)
+            .field("rating", .double, .required)
+            .field("sizes", .array(of: .string), .required)
+            .field("toppings", .array(of: .string), .required)
+            .field("isFavourite", .bool, .required)
+            .field("category_id", .uuid, .references("product_categories", "id"))
             .create()
     }
 
@@ -27,29 +28,17 @@ struct CreateProduct: AsyncMigration {
     }
 }
 
-struct CreateTopping: AsyncMigration {
+
+struct CreateProductCategory: AsyncMigration {
     func prepare(on database: Database) async throws {
-        try await database.schema("toppings")
+        try await database.schema("product_categories")
             .id()
-            .field("name", .string, .required)
+            .field("image_url", .string, .required)
+            .field("title", .string, .required)
             .create()
     }
 
     func revert(on database: Database) async throws {
-        try await database.schema("toppings").delete()
-    }
-}
-
-struct CreateProductTopping: AsyncMigration {
-    func prepare(on database: Database) async throws {
-        try await database.schema("product_toppings")
-            .id()
-            .field("product_id", .uuid, .required, .references("products", "id"))
-            .field("topping_id", .uuid, .required, .references("toppings", "id"))
-            .create()
-    }
-
-    func revert(on database: Database) async throws {
-        try await database.schema("product_toppings").delete()
+        try await database.schema("product_categories").delete()
     }
 }

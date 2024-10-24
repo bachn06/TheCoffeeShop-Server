@@ -7,94 +7,74 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
 final class Product: @unchecked Sendable, Model, Content {
     static let schema = "products"
     
     @ID(key: .id)
     var id: UUID?
-    
+
     @Field(key: "name")
     var name: String
-    
-    @Field(key: "image_url")
-    var imageURL: String?
-    
+
+    @Field(key: "image")
+    var image: String
+
     @Field(key: "price")
-    var price: String
-    
-    @Field(key: "size")
-    var size: Size?
-    
-    @Field(key: "product_description")
+    var price: Double
+
+    @Field(key: "description")
     var productDescription: String
-    
+
     @Field(key: "rating")
-    var rating: Double?
-    
-    @Siblings(through: ProductTopping.self, from: \.$product, to: \.$topping)
-    var toppings: [Topping]
-    
-    @Field(key: "is_favourite")
+    var rating: Double
+
+    @Field(key: "sizes")
+    var sizes: [Size]
+
+    @Field(key: "toppings")
+    var toppings: [String]
+
+    @Field(key: "isFavourite")
     var isFavourite: Bool
-    
-    @Field(key: "quantity")
-    var quantity: Int
 
-    init() {}
+    @Parent(key: "category_id")
+    var category: ProductCategory
 
-    init(id: UUID? = nil, name: String, imageURL: String? = nil, price: String, size: Size? = nil, productDescription: String, rating: Double? = nil, isFavourite: Bool = false, quantity: Int) {
+    init() { }
+
+    init(id: UUID? = nil, name: String, image: String, price: Double, description: String, rating: Double, sizes: [Size], toppings: [String], isFavourite: Bool, categoryId: UUID) {
         self.id = id
         self.name = name
-        self.imageURL = imageURL
+        self.image = image
         self.price = price
-        self.size = size
-        self.productDescription = productDescription
+        self.productDescription = description
         self.rating = rating
+        self.sizes = sizes
+        self.toppings = toppings
         self.isFavourite = isFavourite
-        self.quantity = quantity
+        self.$category.id = categoryId
     }
 }
 
-final class Topping: @unchecked Sendable, Model, Content {
-    static let schema = "toppings"
+final class ProductCategory: @unchecked Sendable, Model, Content {
+    static let schema = "product_categories"
     
     @ID(key: .id)
     var id: UUID?
-    
-    @Field(key: "name")
-    var name: String
-    
-    @Siblings(through: ProductTopping.self, from: \.$topping, to: \.$product)
-    var products: [Product]
-    
-    init() {}
-    
-    init(id: UUID? = nil, name: String) {
-        self.id = id
-        self.name = name
-    }
-}
 
-final class ProductTopping: @unchecked Sendable, Model {
-    static let schema = "product_toppings"
-    
-    @ID(key: .id)
-    var id: UUID?
-    
-    @Parent(key: "product_id")
-    var product: Product
-    
-    @Parent(key: "topping_id")
-    var topping: Topping
-    
-    init() {}
-    
-    init(id: UUID? = nil, productId: UUID, toppingId: UUID) {
+    @Field(key: "image_url")
+    var imageUrl: String
+
+    @Field(key: "title")
+    var title: String
+
+    init() { }
+
+    init(id: UUID? = nil, imageUrl: String, title: String) {
         self.id = id
-        self.$product.id = productId
-        self.$topping.id = toppingId
+        self.imageUrl = imageUrl
+        self.title = title
     }
 }
 

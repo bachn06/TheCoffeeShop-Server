@@ -10,52 +10,31 @@ import Vapor
 struct ProductController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let products = routes.grouped("products")
-        products.get(use: index)
-        products.post(use: create)
-        products.group(":productID") { product in
-            product.get(use: show)
-            product.put(use: update)
-            product.delete(use: delete)
+        products.get(use: fetchProducts)
+        products.get("favourites", use: fetchFavouriteProducts)
+        products.put(":productId", use: updateFavouriteProduct)
+    }
+
+    func fetchProducts(req: Request) throws -> EventLoopFuture<[Product]> {
+        return Product.query(on: req.db).with(\.$category).all()
+    }
+
+    func fetchFavouriteProducts(req: Request) throws -> EventLoopFuture<[Product]> {
+        return Product.query(on: req.db)
+            .filter(\.$isFavourite, .equal, true)
+            .all()
+    }
+
+    func updateFavouriteProduct(req: Request) throws -> EventLoopFuture<Product> {
+        guard let productId = req.parameters.get("productId", as: UUID.self) else {
+            throw Abort(.badRequest)
         }
-    }
 
-    func index(req: Request) async throws -> [Product] {
-        try await Product.query(on: req.db).all()
-    }
-
-    func create(req: Request) async throws -> Product {
-        let product = try req.content.decode(Product.self)
-        try await product.save(on: req.db)
-        return product
-    }
-
-    func show(req: Request) async throws -> Product {
-        guard let product = try await Product.find(req.parameters.get("productID"), on: req.db) else {
-            throw Abort(.notFound)
-        }
-        return product
-    }
-
-    func update(req: Request) async throws -> Product {
-        let input = try req.content.decode(Product.self)
-        guard let product = try await Product.find(req.parameters.get("productID"), on: req.db) else {
-            throw Abort(.notFound)
-        }
-        product.name = input.name
-        product.price = input.price
-        product.size = input.size
-        product.productDescription = input.productDescription
-        product.isFavourite = input.isFavourite
-        product.quantity = input.quantity
-        try await product.save(on: req.db)
-        return product
-    }
-
-    func delete(req: Request) async throws -> HTTPStatus {
-        guard let product = try await Product.find(req.parameters.get("productID"), on: req.db) else {
-            throw Abort(.notFound)
-        }
-        try await product.delete(on: req.db)
-        return .noContent
+        return Product.find(productId, on: req.db)
+            .unwrap(or: Abort(.notFound))
+            .flatMap { product in
+                product.isFavourite.toggle()
+                return product.update(on: req.db).map { product }
+            }
     }
 }
