@@ -25,15 +25,19 @@ final class User: @unchecked Sendable, Model, Content {
 
     @Field(key: "address")
     var address: String
+    
+    @OptionalParent(key: "cart_id")
+    var cart: Cart?
 
     init() { }
 
-    init(id: UUID? = nil, name: String, avatar: String, phone: String, address: String) {
+    init(id: UUID? = nil, name: String, avatar: String, phone: String, address: String, cartId: UUID? = nil) {
         self.id = id
         self.name = name
         self.avatar = avatar
         self.phone = phone
         self.address = address
+        self.$cart.id = cartId
     }
 }
 
@@ -50,4 +54,11 @@ struct LoginResponse: Codable, Content {
 struct AccessToken: Codable, Content {
     var accessToken: String
     var expireIn: Int
+}
+
+struct UpdateUserRequest: Codable {
+    var id: UUID?
+    var name: String
+    var phone: String
+    var address: String
 }

@@ -9,7 +9,7 @@ import Fluent
 
 struct CreateProduct: AsyncMigration {
     func prepare(on database: Database) async throws {
-        try await database.schema("products")
+        try await database.schema(Product.schema)
             .id()
             .field("name", .string, .required)
             .field("image", .string, .required)
@@ -19,19 +19,18 @@ struct CreateProduct: AsyncMigration {
             .field("sizes", .array(of: .string), .required)
             .field("toppings", .array(of: .string), .required)
             .field("isFavourite", .bool, .required)
-            .field("category_id", .uuid, .references("product_categories", "id"))
+            .field("category_id", .uuid, .references(ProductCategory.schema, "id", onDelete: .cascade))
             .create()
     }
 
     func revert(on database: Database) async throws {
-        try await database.schema("products").delete()
+        try await database.schema(Product.schema).delete()
     }
 }
 
-
 struct CreateProductCategory: AsyncMigration {
     func prepare(on database: Database) async throws {
-        try await database.schema("product_categories")
+        try await database.schema(ProductCategory.schema)
             .id()
             .field("image_url", .string, .required)
             .field("title", .string, .required)
@@ -39,6 +38,6 @@ struct CreateProductCategory: AsyncMigration {
     }
 
     func revert(on database: Database) async throws {
-        try await database.schema("product_categories").delete()
+        try await database.schema(ProductCategory.schema).delete()
     }
 }

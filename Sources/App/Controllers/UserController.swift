@@ -38,7 +38,7 @@ struct UserController: RouteCollection {
     }
 
     func updateProfile(req: Request) throws -> EventLoopFuture<User> {
-        let updatedUser = try req.content.decode(User.self)
+        let updatedUser = try req.content.decode(UpdateUserRequest.self)
         
         guard let userId = req.parameters.get("userId", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid user ID")

@@ -56,6 +56,9 @@ final class Cart: @unchecked Sendable, Model, Content {
 
     @Field(key: "payment_method")
     var paymentMethod: String
+    
+    @OptionalChild(for: \.$cart)
+    var user: User?
 
     init() { }
 
